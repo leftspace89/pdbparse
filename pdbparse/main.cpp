@@ -2,7 +2,7 @@
 #include <iomanip>
 #include "pdbparse.h"
 
-//example: parse the win32 ntdll.dll for ApiSetResolveToHost which is not exported but is present in the pdb, then output its address
+//example: parse the win32 ntdll.dll for ApiSetResolveToHost and LdrpHandleTlsData which are not exported but present in the pdb, then output their addresses
 int main(int argc, char **argv)
 {
 	//build a mockup of ntdll so we can parse it
@@ -50,12 +50,19 @@ int main(int argc, char **argv)
 		ntdll.module_base = (uintptr_t)GetModuleHandle("ntdll.dll");
 	}
 
-	const auto address = pdb_parse::get_address_from_symbol("ApiSetResolveToHost", ntdll, false);
+	const auto api_set_resolve_to_host = pdb_parse::get_address_from_symbol("ApiSetResolveToHost", ntdll, false);
 
-	if (address)
-		std::cout << "ApiSetResolveToHost found: 0x" << std::setfill('0') << std::setw(16) << std::hex << address << std::endl;
+	if (api_set_resolve_to_host)
+		std::cout << "ApiSetResolveToHost found: 0x" << std::setfill('0') << std::setw(16) << std::hex << api_set_resolve_to_host << std::endl;
 	else
-		std::cout << "ApiSetResolveToHost not found" << std::endl;
+		std::cout << "ApiSetResolveToHost not found!" << std::endl;
+
+	const auto handle_tls_data = pdb_parse::get_address_from_symbol("LdrpHandleTlsData", ntdll, false);
+
+	if (handle_tls_data)
+		std::cout << "LdrpHandleTlsData found: 0x" << std::setw(16) << std::hex << handle_tls_data << std::endl;
+	else
+		std::cout << "LdrpHandleTlsData not found!" << std::endl;
 
 	std::cin.get();
 
