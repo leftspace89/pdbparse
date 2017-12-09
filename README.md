@@ -10,7 +10,7 @@ diaguids.lib, for parsing the .pdb file
 
 urlmon.lib, for downloading the .pdb file
 
-You also need a C++17-compliant compiler. This project was compiled with MSVC using Visual Studio version 15.5.1
+You also need a C++17-compliant compiler.
 
 
-This supports both x86 and x64, with the example being x64.
+This supports both x86 and x64, including the example.
