@@ -198,10 +198,14 @@ uintptr_t pdb_parse::get_address_from_symbol(std::string_view function_name, con
 	ULONG celt = 0;
 
 	{
-		wchar_t wide_function_name[MAX_PATH];
-		memset(wide_function_name, 0, MAX_PATH * 2);
+		//while it's never used, the maximum function name length for a C++ compiler 'should be atleast 1024 characters', according to stackoverflow, with MSVC and intel's compiler supporting 2048,
+		//and GCC supporting an unlimited amount.
+		constexpr auto max_name_length = 1024;
 
-		MultiByteToWideChar(CP_ACP, 0, function_name.data(), (int)function_name.length(), wide_function_name, MAX_PATH);
+		wchar_t wide_function_name[max_name_length];
+		memset(wide_function_name, 0, max_name_length * 2);
+
+		MultiByteToWideChar(CP_ACP, 0, function_name.data(), (int)function_name.length(), wide_function_name, max_name_length);
 
 		//filter the results so it only gives us symbols with the name we want
 		if (FAILED(global->findChildren(SymTagNull, wide_function_name, nsNone, &enum_symbols)))
