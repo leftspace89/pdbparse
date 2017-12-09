@@ -23,10 +23,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pdbparse.h">
+    <ClInclude Include="pdbparse.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="structs.h">
+    <ClInclude Include="structs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 #include <string_view>
-#include "structs.h"
+#include "structs.hpp"
 
 namespace pdb_parse
 {

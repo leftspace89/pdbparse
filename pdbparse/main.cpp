@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include "pdbparse.h"
+#include "pdbparse.hpp"
 
 //undefined on x86, define it here so we can use constexpr if statements instead of ugly macros
 #ifndef _M_X64
@@ -25,12 +25,12 @@ static module_t get_module_info(std::string_view path, bool is_wow64)
 		return module_t();
 
 	//allocate dll bytes and read it
-	auto module_on_disk = new uint8_t[file_size];
-	ReadFile(file, (LPVOID)module_on_disk, file_size, nullptr, nullptr);
+	auto module_on_disk = std::make_unique<uint8_t[]>(file_size);
+	ReadFile(file, (LPVOID)module_on_disk.get(), file_size, nullptr, nullptr);
 
 	//set image headers
-	auto dos_header = (IMAGE_DOS_HEADER*)module_on_disk;
-	auto image_headers = (void*)(module_on_disk + dos_header->e_lfanew);
+	auto dos_header = (IMAGE_DOS_HEADER*)module_on_disk.get();
+	auto image_headers = (void*)(module_on_disk.get() + dos_header->e_lfanew);
 
 	auto image_headers32 = (IMAGE_NT_HEADERS32*)image_headers;
 	auto image_headers64 = (IMAGE_NT_HEADERS64*)image_headers;
@@ -41,16 +41,16 @@ static module_t get_module_info(std::string_view path, bool is_wow64)
 	IMAGE_SECTION_HEADER *sections_array = nullptr;
 	int section_count = 0;
 
-	uint8_t *module_in_memory = nullptr;
+	std::unique_ptr<uint8_t[]> module_in_memory = nullptr;
 	if (is_wow64)
 	{
-		module_in_memory = new uint8_t[image_headers32->OptionalHeader.SizeOfImage];
+		module_in_memory = std::make_unique<uint8_t[]>(image_headers32->OptionalHeader.SizeOfImage);
 		sections_array = (IMAGE_SECTION_HEADER*)(image_headers32 + 1);
 		section_count = image_headers32->FileHeader.NumberOfSections;
 	}
 	else
 	{
-		module_in_memory = new uint8_t[image_headers64->OptionalHeader.SizeOfImage];
+		module_in_memory = std::make_unique<uint8_t[]>(image_headers64->OptionalHeader.SizeOfImage);
 		sections_array = (IMAGE_SECTION_HEADER*)(image_headers64 + 1);
 		section_count = image_headers64->FileHeader.NumberOfSections;
 	}
@@ -60,7 +60,7 @@ static module_t get_module_info(std::string_view path, bool is_wow64)
 		if (sections_array[i].Characteristics & 0x800)
 			continue;
 
-		memcpy_s(module_in_memory + sections_array[i].VirtualAddress, sections_array[i].SizeOfRawData, module_on_disk + sections_array[i].PointerToRawData, sections_array[i].SizeOfRawData);
+		memcpy_s(module_in_memory.get() + sections_array[i].VirtualAddress, sections_array[i].SizeOfRawData, module_on_disk.get() + sections_array[i].PointerToRawData, sections_array[i].SizeOfRawData);
 	}
 
 	return module_t(0, module_on_disk, module_in_memory, dos_header, path, image_headers);

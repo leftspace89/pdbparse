@@ -1,4 +1,4 @@
-#include "pdbparse.h"
+#include "pdbparse.hpp"
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
@@ -50,12 +50,12 @@ static std::string get_pdb_path(std::string_view module_path, const module_t &mo
 	if (debug_directory)
 	{
 		//loop through debug shit until we find one for IMAGE_DEBUG_TYPE_CODEVIEW
-		for (auto current_debug_dir = (IMAGE_DEBUG_DIRECTORY*)(debug_directory + module_info.module_in_memory); current_debug_dir->SizeOfData; current_debug_dir++)
+		for (auto current_debug_dir = (IMAGE_DEBUG_DIRECTORY*)(module_info.module_in_memory.get() + debug_directory); current_debug_dir->SizeOfData; current_debug_dir++)
 		{
 			if (current_debug_dir->Type != IMAGE_DEBUG_TYPE_CODEVIEW)
 				continue;
 
-			const auto codeview_info = (codeviewInfo_t*)(module_info.module_on_disk + current_debug_dir->PointerToRawData);
+			const auto codeview_info = (codeviewInfo_t*)(module_info.module_on_disk.get() + current_debug_dir->PointerToRawData);
 
 			//is the given pdb filename valid?
 			if (does_file_exist(codeview_info->PdbFileName))
