@@ -28,6 +28,18 @@ struct module_t
 		IMAGE_NT_HEADERS64 *image_headers64;
 	} ImageHeaders;
 
+	module_t(uintptr_t module_base, uint8_t *module_on_disk, uint8_t *module_in_memory, IMAGE_DOS_HEADER *dos_header, std::string_view path, void *image_headers)
+	{
+		this->module_base = module_base;
+		this->module_on_disk = module_on_disk;
+		this->module_in_memory = module_in_memory;
+		this->dos_header = dos_header;
+		this->path = path;
+		this->ImageHeaders.image_headers32 = (IMAGE_NT_HEADERS32*)image_headers;
+	}
+
+	module_t() {}
+
 	~module_t()
 	{
 		delete[] module_in_memory;

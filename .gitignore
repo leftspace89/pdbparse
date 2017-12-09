@@ -31,6 +31,8 @@
 *.out
 *.app
 
+Release/
+pdbparse/Release
 x64/
 pdbparse/x64
 .vs/
