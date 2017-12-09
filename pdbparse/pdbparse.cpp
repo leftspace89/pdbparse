@@ -113,7 +113,7 @@ static std::string get_pdb_path(std::string_view module_path, const module_t &mo
 
 uintptr_t pdb_parse::get_address_from_symbol(std::string_view function_name, const module_t &module_info, bool is_wow64)
 {
-	if (!module_info.module_in_memory || !module_info.module_on_disk || !module_info.dos_header || !module_info.ImageHeaders.image_headers32)
+	if (!module_info)
 		return 0;
 
 	//init com stuff

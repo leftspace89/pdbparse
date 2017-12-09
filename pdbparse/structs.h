@@ -38,6 +38,8 @@ struct module_t
 		this->ImageHeaders.image_headers32 = (IMAGE_NT_HEADERS32*)image_headers;
 	}
 
+	operator bool() const { return module_on_disk && module_in_memory && dos_header && ImageHeaders.image_headers32 && !path.empty(); }
+
 	module_t() {}
 
 	~module_t()
