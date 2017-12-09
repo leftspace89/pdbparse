@@ -10,8 +10,7 @@
 #endif
 
 //helper function to parse a module
-//if module_base is zero, it will use the value stored in the PE header
-static module_t get_module_info(std::string_view path, uintptr_t module_base, bool is_wow64)
+static module_t get_module_info(std::string_view path, bool is_wow64)
 {
 	//read raw bytes
 	const auto file = CreateFile(path.data(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -64,14 +63,7 @@ static module_t get_module_info(std::string_view path, uintptr_t module_base, bo
 		memcpy_s(module_in_memory + sections_array[i].VirtualAddress, sections_array[i].SizeOfRawData, module_on_disk + sections_array[i].PointerToRawData, sections_array[i].SizeOfRawData);
 	}
 
-	uintptr_t actual_module_base;
-
-	if (module_base)
-		actual_module_base = module_base;
-	else
-		actual_module_base = (is_wow64 ? image_headers32->OptionalHeader.ImageBase : image_headers64->OptionalHeader.ImageBase);
-
-	return module_t(actual_module_base, module_on_disk, module_in_memory, dos_header, path, image_headers);
+	return module_t(0, module_on_disk, module_in_memory, dos_header, path, image_headers);
 }
 
 static void output_function_address(std::string_view function_name, const module_t &module_info, bool is_wow64)
@@ -90,7 +82,7 @@ int main(int argc, char **argv)
 
 	//this path will only work if your OS is x64-based
 	//if it's x86-based, use System32
-	const auto ntdll32 = get_module_info("C:\\Windows\\SysWOW64\\ntdll.dll", 0, true);
+	const auto ntdll32 = get_module_info("C:\\Windows\\SysWOW64\\ntdll.dll", true);
 
 	output_function_address("ApiSetResolveToHost", ntdll32, true);
 	output_function_address("LdrpHandleTlsData", ntdll32, true);
@@ -99,7 +91,7 @@ int main(int argc, char **argv)
 	{
 		std::cout << "\nx64 ntdll:" << std::endl;
 
-		const auto ntdll64 = get_module_info("C:\\Windows\\System32\\ntdll.dll", 0, false);
+		const auto ntdll64 = get_module_info("C:\\Windows\\System32\\ntdll.dll", false);
 
 		output_function_address("ApiSetResolveToHost", ntdll64, false);
 		output_function_address("LdrpHandleTlsData", ntdll64, false);
