@@ -80,9 +80,11 @@ int main(int argc, char **argv)
 {
 	std::cout << "x86 ntdll:" << std::endl;
 
-	//this path will only work if your OS is x64-based
-	//if it's x86-based, use System32
-	const auto ntdll32 = get_module_info("C:\\Windows\\SysWOW64\\ntdll.dll", true);
+	auto ntdll32 = get_module_info("C:\\Windows\\SysWOW64\\ntdll.dll", true);
+
+	//if the OS is x86-based, this will be stored in system32
+	if (!ntdll32)
+		ntdll32 = get_module_info("C:\\Windows\\System32\\ntdll.dll", true);
 
 	output_function_address("ApiSetResolveToHost", ntdll32, true);
 	output_function_address("LdrpHandleTlsData", ntdll32, true);
