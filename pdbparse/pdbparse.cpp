@@ -23,9 +23,9 @@ static std::unordered_map<std::string, std::pair<std::unordered_map<std::string,
 
 //try to find the module's pdb path, first with the pdb name specified, then with the expected path in the tmp folder
 //if that fails, it's downloaded from the microsoft symbol store (or whatever symbol server you want)
-static std::string get_pdb_path(std::string_view module_path, const module_t &module_info, bool is_wow64)
+static std::string get_pdb_path(const module_t &module_info, bool is_wow64)
 {
-	auto &pdb_path = cached_info[module_path.data()].second;
+	auto &pdb_path = cached_info[module_info.path].second;
 
 	//check if we've parsed this already
 	if (!pdb_path.empty())
@@ -133,7 +133,7 @@ uintptr_t pdb_parse::get_address_from_symbol(std::string_view function_name, con
 	if (function_address)
 		return function_address + module_info.module_base;
 
-	const auto pdb_path = get_pdb_path(module_info.path, module_info, is_wow64);
+	const auto pdb_path = get_pdb_path(module_info, is_wow64);
 
 	if (pdb_path.empty())
 		return 0;
